@@ -65,6 +65,7 @@ DOWNLOAD_DELAY = 1.75
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
    'zapimoveis.pipelines.DuplicatesPipeline': 100,
+   'zapimoveis.pipelines.StorageDBPipeline': 200,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)

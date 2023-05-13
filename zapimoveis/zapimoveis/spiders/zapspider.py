@@ -1,4 +1,5 @@
 import re
+import psycopg2 as pg
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from zapimoveis.items import ZapItem
@@ -43,13 +44,13 @@ class ZapimoveisSpider(CrawlSpider):
             loader.add_value('housing_type', response.url)
             loader.add_value('rent_type', card.css('.simple-card__price strong small::text').get().strip())
             loader.add_value('price', card.css('.simple-card__price strong::text').get().strip())
-            loader.add_value('cond_price', card.css('.condominium').css('.card-price__value::text').get())
-            loader.add_value('iptu_price', card.css('.iptu span::text').get())
-            loader.add_value('size_m2', card.css('.js-areas span::text').get())
-            loader.add_value('bedroom_count', card.css('.js-bedrooms span::text').get(default=None))
-            loader.add_value('parking_count', card.css('.js-parking-spaces span::text').get(default=None))
-            loader.add_value('bathroom_count', card.css('.js-bathrooms span::text').get(default=None))
-            loader.add_value('datetime', dt.datetime.now().strftime("%d/%m/%y %H:%M"))
+            loader.add_value('condominium', card.css('.condominium').css('.card-price__value::text').get(default="None"))
+            loader.add_value('iptu_price', card.css('.iptu span::text').get(default="None"))
+            loader.add_value('size_m2', card.css('.js-areas span::text').get(default="None"))
+            loader.add_value('bedroom_count', card.css('.js-bedrooms span::text').get(default="None"))
+            loader.add_value('parking_count', card.css('.js-parking-spaces span::text').get(default="None"))
+            loader.add_value('bathroom_count', card.css('.js-bathrooms span::text').get(default="None"))
+            loader.add_value('datetime', dt.datetime.now())
 
             yield loader.load_item()
 
@@ -57,5 +58,37 @@ class ZapimoveisSpider(CrawlSpider):
             page = response.url[:response.url.index('lis/')+4]
             self.page_number[self.start_urls.index(page)] += 1
             next_page = f'{page}?pagina={self.page_number[self.start_urls.index(page)]}'
-
             yield response.follow(next_page, callback=self.parse_item)
+
+    def closed(self, reason):
+
+        stats = self.crawler.stats.get_stats()
+
+        db_conn = pg.connect(
+            host="localhost",
+            database="rent_watch",
+            port=5432,
+            user="postgres",
+	    password="password" # Enter real password here!
+        )
+
+        with db_conn.cursor() as cursor:
+
+            a = (self.name, stats["item_scraped_count"], stats["item_dropped_count"], stats["start_time"], stats["finish_time"], 
+                 stats["elapsed_time_seconds"], stats['downloader/request_count'], stats['downloader/response_count'],
+                 stats['finish_reason'], stats["request_depth_max"])
+
+            sql_insert = """
+                INSERT INTO job_stats (spider_name, item_count, item_drop_count, start_time, finish_time,
+                duration, request_count, response_count, finish_reason, max_depth) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+
+            sql_update = """
+                UPDATE rent_data SET job_id = (SELECT max(job_id) from job_stats) WHERE rent_data.job_id = -987;
+            """
+
+            cursor.execute(sql_insert, a)
+            cursor.execute(sql_update)
+        db_conn.commit()
+        db_conn.close()
