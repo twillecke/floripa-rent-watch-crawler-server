@@ -21,7 +21,6 @@ class DuplicatesPipeline:
 
 
 class StorageDBPipeline:
-    #Instanceing database connection
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
         data = [-987,
@@ -39,6 +38,7 @@ class StorageDBPipeline:
         #Inserting into Database
         db = Database() 
         db.insert_item(data)
+        db.close_conn()
 
         return item
 

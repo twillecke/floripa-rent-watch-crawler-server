@@ -62,6 +62,7 @@ class ZapimoveisSpider(CrawlSpider):
             page = response.url[:response.url.index('lis/')+4]
             self.page_number[self.start_urls.index(page)] += 1
             next_page = f'{page}?pagina={self.page_number[self.start_urls.index(page)]}'
+
             yield response.follow(next_page, callback=self.parse_item)
 
     def closed(self, reason):
@@ -78,6 +79,8 @@ class ZapimoveisSpider(CrawlSpider):
                  stats['finish_reason'], stats["request_depth_max"]]
 
         db = Database()
+
         db.insert_into_job_stats(a)
         db.update_rent_data_on_finish()
 
+        db.close_conn()
