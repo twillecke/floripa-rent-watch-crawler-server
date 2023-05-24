@@ -116,6 +116,78 @@ class Database():
         except Exception as error:
             return error
 
+    def fetch_mailing_list(self):
+        try:
+            conn = self.conn
+            cur = self.cur
+
+            sql_select = """
+                        SELECT email 
+                        FROM mailing_list
+                        WHERE status = 1;
+                        """
+
+            cur.execute(sql_select)
+
+            mail_list = cur.fetchall()
+            mail_list = [mail[0] for mail in mail_list] 
+
+            return mail_list
+
+        except Exception as error:
+            return error
 
 
+    def activate_mailing_list(self, email):
+        try:
+            conn = self.conn
+            cur = self.cur
 
+            sql_update = f"""
+                        UPDATE mailing_list
+                        SET status = 1
+                        WHERE email = \'{email}\'
+                        """
+            
+            cur.execute(sql_update)
+            conn.commit()
+
+        except Exception as error:
+            return error
+
+    def deactivate_mailing_list(self, email):
+        try:
+            conn = self.conn
+            cur = self.cur
+
+            sql_update = f"""
+                        UPDATE mailing_list
+                        SET status = 0
+                        WHERE email = \'{email}\'
+                        """
+
+            cur.execute(sql_update)
+            conn.commit()
+
+        except Exception as error:
+            return error
+
+    def insert_into_mailing_list(self, email):
+        try:
+            conn = self.conn
+            cur = self.cur
+
+            sql_insert = """
+                        INSERT INTO mailing_list (email, status)
+                        VALUES (%s, 1)
+                        """
+
+            cur.execute(sql_insert, email)
+            conn.commit()
+
+        except Exception as error:
+            return error
+
+if __name__ == "__main__":
+    db = Database()
+    print(db.activate_mailing_list("gbarbosa1407@gmail.com"))

@@ -43,3 +43,10 @@ CREATE TABLE IF NOT EXISTS rent_data(
     datetime TIMESTAMP,
     PRIMARY KEY(job_id, rent_id)
 );
+
+CREATE TABLE IF NOT EXISTS mailing_list(
+    mail_id BIGSERIAL NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    status INT NOT NULL,
+    PRIMARY KEY(email)
+);

@@ -6,54 +6,11 @@ import psycopg2 as pg
 import datetime as dt
 import socket
 from password import pg_pw, email_pw
-
-DB_HOST = 'localhost'
-DB_NAME = 'rent_watch'
-DB_PORT = 5432
-DB_USER = 'postgres'
+from query import Database
 
 SENDER_EMAIL = 'floriparentwatch@gmail.com'
-RECEIVER_EMAILS = [
-    'floriparentwatch@gmail.com',
-    'gbarbosa1407@gmail.com',
-    'thiagogwillecke@gmail.com'
-]
 
-def fetch_last_job_stats():
-    conn = None
-    try:
-        conn = pg.connect(
-            host=DB_HOST,
-            database=DB_NAME,
-            port=DB_PORT,
-            user=DB_USER,
-            password=pg_pw()
-        )
-        cur = conn.cursor()
-
-        sql_stats = "SELECT * FROM job_stats ORDER BY 1 DESC LIMIT 1;"
-        sql_columns = """
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_schema = 'public' AND table_name = 'job_stats';
-        """
-
-        cur.execute(sql_stats)
-        stats = cur.fetchone()
-
-        stats = [stat for stat in stats]
-
-        cur.execute(sql_columns)
-        columns = cur.fetchall()
-
-        columns = [elem[0] for elem in columns]
-
-        return stats, columns
-    finally:
-        if conn:
-            conn.close()
-
-def send_weekly_report_email(stats, columns):
+def send_weekly_report_email(stats, columns, mailing_list):
     PORT = 465  # This is the default SSL port
     context = ssl.create_default_context()
 
@@ -79,11 +36,16 @@ def send_weekly_report_email(stats, columns):
 
         message = f"Subject: {subject}\n\n{message_body}"
 
-        server.sendmail(SENDER_EMAIL, RECEIVER_EMAILS, message.encode("utf-8"))
+        server.sendmail(SENDER_EMAIL, mailing_list, message.encode("utf-8"))
 
 def main():
-    stats, columns = fetch_last_job_stats()
-    send_weekly_report_email(stats, columns)
+    db = Database()
+
+    mailing_list = db.fetch_mailing_list()
+    stats, columns = db.fetch_last_job_stats()
+    db.close_conn()
+
+    send_weekly_report_email(stats, columns, mailing_list)
 
 if __name__ == '__main__':
     main()
