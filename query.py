@@ -23,12 +23,16 @@ class Database():
     def test_conn(self):
         print(self.conn)
 
+    def close_conn(self):
+        self.conn.close()
+
     def fetch_last_job_stats(self):
         try:
             conn = self.conn
             cur = self.cur
 
             sql_stats = "SELECT * FROM job_stats ORDER BY 1 DESC LIMIT 1;"
+
             sql_columns = """
             SELECT column_name
             FROM information_schema.columns
@@ -47,9 +51,9 @@ class Database():
 
             return stats, columns
 	    
-        finally:
-            if conn:
-                conn.close()
+        except Exception as error:
+            return error
+
 
     def insert_into_job_stats(self, obj):
         try:
@@ -66,25 +70,26 @@ class Database():
             cur.execute(sql_insert, obj)
             conn.commit()
 
-        finally:
-            if conn:
-                conn.close()
+        except Exception as error:
+            return error
 
     def update_rent_data_on_finish(self):
+
         try:
             conn = self.conn
             cur = self.cur
 
             sql_update = """
-                         UPDATE rent_data SET job_id = (SELECT max(job_id) from job_stats) WHERE rent_data.job_id = -987;
+                         UPDATE rent_data
+                         SET job_id = (SELECT max(job_id) from job_stats) 
+                         WHERE rent_data.job_id = -987;
 	                 """
 
             cur.execute(sql_update)
             conn.commit()
 
-        finally:
-            if conn:
-                conn.close()
+        except Exception as error:
+            return error
 
     def insert_item(self, obj):
         try:
@@ -108,10 +113,8 @@ class Database():
             cur.execute(sql_insert, obj)
             conn.commit()
 
-        finally:
-            if conn:
-                conn.close()
-
+        except Exception as error:
+            return error
 
 
 
