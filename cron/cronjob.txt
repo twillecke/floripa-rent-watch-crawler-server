@@ -1,7 +1,7 @@
 
-6 17 * * 6 . $HOME/.profile; . $HOME/cron/email.sh
+6 20 * * 4 . $HOME/.profile; . $HOME/cron/email.sh
 
-5 17 * * 6 . $HOME/.profile; . $HOME/cron/backup.sh
+5 20 * * 4 . $HOME/.profile; . $HOME/cron/backup.sh
 
-0 17 * * 6 . $HOME/.profile; . $HOME/cron/crawl.sh
+0 20 * * 4 . $HOME/.profile; . $HOME/cron/crawl.sh
 
