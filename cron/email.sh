@@ -1,4 +1,4 @@
 #!usr/bin/bash
 
-cd $HOME
-python3 send_weekly_report_mail.py
+cd /home/project_files/
+python3 send_weekly_report_mail_html.py
