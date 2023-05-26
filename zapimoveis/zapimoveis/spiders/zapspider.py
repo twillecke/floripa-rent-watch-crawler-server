@@ -69,7 +69,7 @@ class ZapimoveisSpider(CrawlSpider):
 
         stats = self.crawler.stats.get_stats()
 
-        if stats.get('item_drop_count'):
+        if stats.get('item_dropped_count'):
             a = [self.name, stats["item_scraped_count"], stats["item_dropped_count"], stats["start_time"], stats["finish_time"], 
                  stats["elapsed_time_seconds"], stats['downloader/request_count'], stats['downloader/response_count'],
                  stats['finish_reason'], stats["request_depth_max"]]
