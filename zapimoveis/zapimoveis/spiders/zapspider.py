@@ -1,10 +1,14 @@
-import re
+import re, sys, os
 import psycopg2 as pg
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from zapimoveis.items import ZapItem
 from scrapy.loader import ItemLoader
 import datetime as dt
+abspt = os.path.abspath('../../..')
+sys.path.append(abspt)
+from query import Database
+
 
 class ZapimoveisSpider(CrawlSpider):
 
@@ -58,37 +62,25 @@ class ZapimoveisSpider(CrawlSpider):
             page = response.url[:response.url.index('lis/')+4]
             self.page_number[self.start_urls.index(page)] += 1
             next_page = f'{page}?pagina={self.page_number[self.start_urls.index(page)]}'
+
             yield response.follow(next_page, callback=self.parse_item)
 
     def closed(self, reason):
 
         stats = self.crawler.stats.get_stats()
 
-        db_conn = pg.connect(
-            host="localhost",
-            database="rent_watch",
-            port=5432,
-            user="postgres",
-	    password="password" # Enter real password here!
-        )
-
-        with db_conn.cursor() as cursor:
-
-            a = (self.name, stats["item_scraped_count"], stats["item_dropped_count"], stats["start_time"], stats["finish_time"], 
+        if stats.get('item_drop_count'):
+            a = [self.name, stats["item_scraped_count"], stats["item_dropped_count"], stats["start_time"], stats["finish_time"], 
                  stats["elapsed_time_seconds"], stats['downloader/request_count'], stats['downloader/response_count'],
-                 stats['finish_reason'], stats["request_depth_max"])
+                 stats['finish_reason'], stats["request_depth_max"]]
+        else:
+            a = [self.name, stats["item_scraped_count"], 0, stats["start_time"], stats["finish_time"], 
+                 stats["elapsed_time_seconds"], stats['downloader/request_count'], stats['downloader/response_count'],
+                 stats['finish_reason'], stats["request_depth_max"]]
 
-            sql_insert = """
-                INSERT INTO job_stats (spider_name, item_count, item_drop_count, start_time, finish_time,
-                duration, request_count, response_count, finish_reason, max_depth) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """
+        db = Database()
 
-            sql_update = """
-                UPDATE rent_data SET job_id = (SELECT max(job_id) from job_stats) WHERE rent_data.job_id = -987;
-            """
+        db.insert_into_job_stats(a)
+        db.update_rent_data_on_finish()
 
-            cursor.execute(sql_insert, a)
-            cursor.execute(sql_update)
-        db_conn.commit()
-        db_conn.close()
+        db.close_conn()
