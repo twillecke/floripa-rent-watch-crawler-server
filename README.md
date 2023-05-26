@@ -16,10 +16,13 @@ Um dos nossos scripts envia relatórios semanais com detalhes sobre o último jo
 ## Metas
 Nossas metas principais incluem:
 
-Enviar relatórios semanais sobre a variação dos preços dos aluguéis em Florianópolis nos períodos semanal, mensal, trimestral, semestral e anual.
-Alimentar um perfil de Twitter automaticamente com as análises mencionadas, por meio de posts. Referência: Dólar Bipolar; GPU Bipolar.
-Implementar um chatbot responsivo no Telegram, capaz de gerar relatórios dinamicamente com base nos comandos recebidos.
-Desenvolver um web-app com um dashboard interativo para visualização e análise dos dados coletados.
+- Enviar relatórios semanais sobre a variação dos preços dos aluguéis em Florianópolis nos períodos semanal, mensal, trimestral, semestral e anual.
+- Alimentar um perfil de Twitter automaticamente com as análises mencionadas, por meio de posts.
+- Implementar um chatbot responsivo no Telegram, capaz de gerar relatórios dinamicamente com base nos comandos recebidos.
+- Desenvolver um web-app com um dashboard interativo para visualização e análise dos dados coletados.
 
 ## Como contribuir
 Se você deseja contribuir para este projeto, fique à vontade para fazer um fork deste repositório, implementar melhorias e enviar um pull request. Agradecemos antecipadamente pelo seu interesse em ajudar no desenvolvimento deste projeto!
+
+## Licença
+Este projeto é licenciado sob a MIT License.
