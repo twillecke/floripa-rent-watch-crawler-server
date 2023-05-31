@@ -45,9 +45,9 @@ def strip_(value):
 
 def rent_type_convert(value):
     if 'dia' in value:
-        return 'D'
+        return 'daily'
     else:
-        return 'M'
+        return 'monthly'
 
 class ZapItem(scrapy.Item):
 
