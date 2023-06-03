@@ -1,3 +1,6 @@
+![Python Badge](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
+![Debian](https://img.shields.io/badge/Debian-A81D33?style=for-the-badge&logo=debian&logoColor=white)
+![Debian](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 # Floripa Rent Watch
 ## Objetivo do projeto
 Realizar análises históricas e de tendência da flutuação de preços de aluguel no mercado imobiliário de Florianópolis/SC. Essas análises serão divulgadas em formato de dashboard na internet, por meio de um web-app e bots de rede social, com atualizações contínuas e automatizadas.
