@@ -1,5 +1,4 @@
 import psycopg2 as pg
-import datetime
 from password import pg_pw
 
 
@@ -8,7 +7,7 @@ class Database():
     def __init__(self):
 
         self.DB_HOST = 'localhost'
-        self.DB_NAME = 'renttest'
+        self.DB_NAME = 'rent_watch'
         self.DB_PORT = 5432
         self.DB_USER = 'postgres'
 
