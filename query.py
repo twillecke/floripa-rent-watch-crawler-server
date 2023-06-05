@@ -1,15 +1,17 @@
 import psycopg2 as pg
+import datetime
 from password import pg_pw
+
 
 class Database():
 
     def __init__(self):
 
         self.DB_HOST = 'localhost'
-        self.DB_NAME = 'rent_watch'
+        self.DB_NAME = 'renttest'
         self.DB_PORT = 5432
         self.DB_USER = 'postgres'
-		
+
         self.conn = pg.connect(
             host=self.DB_HOST,
             database=self.DB_NAME,
@@ -28,7 +30,6 @@ class Database():
 
     def fetch_last_job_stats(self):
         try:
-            conn = self.conn
             cur = self.cur
 
             sql_stats = "SELECT * FROM job_stats ORDER BY 1 DESC LIMIT 1;"
@@ -50,10 +51,9 @@ class Database():
             columns = [elem[0] for elem in columns]
 
             return stats, columns
-	    
+
         except Exception as error:
             return error
-
 
     def insert_into_job_stats(self, obj):
         try:
@@ -61,31 +61,14 @@ class Database():
             cur = self.cur
 
             sql_insert = """
-                         INSERT INTO job_stats 
+                         INSERT INTO job_stats
                          (spider_name, item_count, item_drop_count, start_time, finish_time,
-                         duration, request_count, response_count, finish_reason, max_depth) 
+                         duration, request_count, response_count, finish_reason, max_depth)
                          VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                          """
 
             cur.execute(sql_insert, obj)
-            conn.commit()
 
-        except Exception as error:
-            return error
-
-    def update_rent_data_on_finish(self):
-
-        try:
-            conn = self.conn
-            cur = self.cur
-
-            sql_update = """
-                         UPDATE rent_data
-                         SET job_id = (SELECT max(job_id) from job_stats) 
-                         WHERE rent_data.job_id = -987;
-	                 """
-
-            cur.execute(sql_update)
             conn.commit()
 
         except Exception as error:
@@ -137,7 +120,6 @@ class Database():
         except Exception as error:
             return error
 
-
     def activate_mailing_list(self, email):
         try:
             conn = self.conn
@@ -148,7 +130,7 @@ class Database():
                         SET status = 1
                         WHERE email = \'{email}\'
                         """
-            
+
             cur.execute(sql_update)
             conn.commit()
 
@@ -188,6 +170,6 @@ class Database():
         except Exception as error:
             return error
 
+
 if __name__ == "__main__":
-    db = Database()
-    print(db.activate_mailing_list("gbarbosa1407@gmail.com"))
+    print(f'Running main: {__name__}')
