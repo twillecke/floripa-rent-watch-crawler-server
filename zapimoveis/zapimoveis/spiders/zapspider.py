@@ -1,5 +1,4 @@
 import re, sys, os
-import psycopg2 as pg
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from zapimoveis.items import ZapItem
@@ -32,7 +31,7 @@ class ZapimoveisSpider(CrawlSpider):
     page_number = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
     rules = (
-        Rule(LinkExtractor(allow='florianopolis'), callback="parse_item"),
+        Rule(LinkExtractor(allow='florianopolis', deny=['version=V2','imovel/']), callback="parse_item"),
     )
 
     def parse_item(self, response):
@@ -70,17 +69,14 @@ class ZapimoveisSpider(CrawlSpider):
         stats = self.crawler.stats.get_stats()
 
         if stats.get('item_dropped_count'):
-            a = [self.name, stats["item_scraped_count"], stats["item_dropped_count"], stats["start_time"], stats["finish_time"], 
+            a = [self.name, stats["item_scraped_count"], stats["item_dropped_count"], stats["start_time"], stats["finish_time"],
                  stats["elapsed_time_seconds"], stats['downloader/request_count'], stats['downloader/response_count'],
                  stats['finish_reason'], stats["request_depth_max"]]
         else:
-            a = [self.name, stats["item_scraped_count"], 0, stats["start_time"], stats["finish_time"], 
+            a = [self.name, stats["item_scraped_count"], 0, stats["start_time"], stats["finish_time"],
                  stats["elapsed_time_seconds"], stats['downloader/request_count'], stats['downloader/response_count'],
                  stats['finish_reason'], stats["request_depth_max"]]
 
         db = Database()
-
         db.insert_into_job_stats(a)
-        db.update_rent_data_on_finish()
-
         db.close_conn()
