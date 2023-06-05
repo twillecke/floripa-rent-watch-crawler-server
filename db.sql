@@ -106,3 +106,86 @@ CREATE TABLE IF NOT EXISTS overview(
     vila_daily_avg NUMERIC(15,2),
     PRIMARY KEY(job_ids, week)
 );
+
+CREATE OR REPLACE FUNCTION update_job_id_after_job_finish()
+    RETURNS TRIGGER AS $$
+    BEGIN
+        UPDATE rent_data SET job_id = NEW.job_id WHERE job_id < 0;
+    RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_job_id
+    BEFORE INSERT ON job_stats
+    FOR EACH ROW
+    EXECUTE FUNCTION update_job_id_after_job_finish();
+
+CREATE OR REPLACE FUNCTION insert_overview()
+RETURNS TRIGGER AS $$
+    BEGIN
+        INSERT INTO overview
+        SELECT ARRAY_AGG (DISTINCT j.job_id ORDER BY j.job_id) job_ids,
+            DATE_PART('week',j.start_time) as week,
+            COUNT (*),
+            AVG (r.price),
+            COUNT (CASE WHEN r.rent_type = 'monthly' THEN r.price END) as d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' THEN r.price END) as d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' THEN r.price END) as m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' THEN r.price END) as m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'apartamento' THEN r.price END) as apart_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'apartamento' THEN r.price END) as apart_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'apartamento' THEN r.price END) as apart_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'apartamento' THEN r.price END) as apart_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'casa' THEN r.price END) as casa_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'casa' THEN r.price END) as casa_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'casa' THEN r.price END) as casa_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'casa' THEN r.price END) as casa_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'chacara' THEN r.price END) as chacara_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'chacara' THEN r.price END) as chacara_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'chacara' THEN r.price END) as chacara_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'chacara' THEN r.price END) as chacara_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'cobertura' THEN r.price END) as cobertura_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'cobertura' THEN r.price END) as cobertura_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'cobertura' THEN r.price END) as cobertura_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'cobertura' THEN r.price END) as cobertura_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'condominio' THEN r.price END) as condominio_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'condominio' THEN r.price END) as condominio_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'condominio' THEN r.price END) as condominio_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'condominio' THEN r.price END) as condominio_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'flat' THEN r.price END) as flat_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'flat' THEN r.price END) as flat_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'flat' THEN r.price END) as flat_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'flat' THEN r.price END) as flat_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'loft' THEN r.price END) as loft_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'loft' THEN r.price END) as loft_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'loft' THEN r.price END) as loft_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'loft' THEN r.price END) as loft_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'quitinete' THEN r.price END) as quitinete_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'quitinete' THEN r.price END) as quitinete_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'quitinete' THEN r.price END) as quitinete_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'quitinete' THEN r.price END) as quitinete_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'sobrado' THEN r.price END) as sobrado_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'sobrado' THEN r.price END) as sobrado_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'sobrado' THEN r.price END) as sobrado_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'sobrado' THEN r.price END) as sobrado_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'studio' THEN r.price END) as studio_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'studio' THEN r.price END) as studio_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'studio' THEN r.price END) as studio_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'studio' THEN r.price END) as studio_m_avg,
+            COUNT (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'vila' THEN r.price END) as vila_d_count,
+            AVG (CASE WHEN r.rent_type = 'monthly' AND r.housing_type = 'vila' THEN r.price END) as vila_d_avg,
+            COUNT (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'vila' THEN r.price END) as vila_m_count,
+            AVG (CASE WHEN r.rent_type = 'daily' AND r.housing_type = 'vila' THEN r.price END) as vila_m_avg
+        FROM rent_data r
+        JOIN job_stats j USING (job_id)
+        WHERE DATE_PART('week',j.start_time) = DATE_PART('week',NEW.start_time)
+        GROUP BY week
+        ORDER BY week;
+    RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER insert_overview
+    AFTER INSERT ON job_stats
+    FOR EACH ROW
+    EXECUTE FUNCTION insert_overview();
