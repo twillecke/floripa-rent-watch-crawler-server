@@ -41,13 +41,28 @@ def send_weekly_report_email(stats, columns, mailing_list):
             message_body += f'<td style="border: 1px solid black; padding: 5px; color: black; {cell_style}">{stats[i]}</td>'
             message_body += '</tr>'
 
-        message_body += '</tbody></table>'
+
+        message_body += '<h2 style="color: black;">Log do Backup:</h1>'
+        with open('/home/project_files/backup/backup.log', 'r') as file:
+            for line in file:
+                if "lizing" in line:
+                    message_body += f'<p><strong style="color: black; font-size: 16px">{line}</strong></p>'
+                elif "Deleting" in line:
+                    message_body += f'<p><strong style="color: black; font-size: 16px">{line}</strong></p>'
+                elif "routine" in line:
+                    message_body += f'<p><strong style="color: black; font-size: 16px">{line}</strong></p>'
+                elif "Saving" in line:
+                    message_body += f'<p><strong style="color: black; font-size: 16px">{line}</strong></p>'
+                else:
+                    message_body += f'<pre style="color: black; font-size: 10px">{line}</pre>'
 
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
 
         message_body += f"<p>E-mail enviado em {(dt.datetime.now() - dt.timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S')} de {ip_address}.</p>"
+        message_body += '</tbody></table>'
         message_body += '</body></html>'
+
 
         message = f"Subject: {subject}\n"
         message += "MIME-Version: 1.0\n"
