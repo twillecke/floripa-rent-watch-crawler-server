@@ -10,6 +10,8 @@ mkdir -p $path
 
 echo '' > $log
 
+printf "Starting backup routine.\n\n" >> $log
+
 printf "Saving backup on:\n\n%s\n" "$path" >> $log
 
 printf "\nInitializing Backup -- $(date +%H:%M:%S)\n\n" >> $log
