@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS rent_data(
 
 CREATE TABLE IF NOT EXISTS mailing_list(
     mail_id BIGSERIAL NOT NULL,
-    email VARCHAR(255) NOT NULL,
+    email BYTEA NOT NULL,
     status INT NOT NULL,
     PRIMARY KEY(email)
 );
@@ -189,3 +189,5 @@ CREATE TRIGGER insert_overview
     AFTER INSERT ON job_stats
     FOR EACH ROW
     EXECUTE FUNCTION insert_overview();
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;

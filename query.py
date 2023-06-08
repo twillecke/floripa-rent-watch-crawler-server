@@ -1,5 +1,6 @@
 import psycopg2 as pg
-from password import pg_pw
+import datetime
+from password import pg_pw, aes_key
 
 
 class Database():
@@ -103,8 +104,8 @@ class Database():
             conn = self.conn
             cur = self.cur
 
-            sql_select = """
-                        SELECT email 
+            sql_select = f"""
+                        SELECT convert_from(decrypt(email,\'{aes_key()}\','AES'),'SQL_ASCII')
                         FROM mailing_list
                         WHERE status = 1;
                         """
@@ -112,7 +113,7 @@ class Database():
             cur.execute(sql_select)
 
             mail_list = cur.fetchall()
-            mail_list = [mail[0] for mail in mail_list] 
+            mail_list = [mail[0] for mail in mail_list]
 
             return mail_list
 
@@ -127,7 +128,7 @@ class Database():
             sql_update = f"""
                         UPDATE mailing_list
                         SET status = 1
-                        WHERE email = \'{email}\'
+                        WHERE email = encrypt(\'{email}\', \'{aes_key()}\', 'AES')
                         """
 
             cur.execute(sql_update)
@@ -144,7 +145,7 @@ class Database():
             sql_update = f"""
                         UPDATE mailing_list
                         SET status = 0
-                        WHERE email = \'{email}\'
+                        WHERE email = encrypt(\'{email}\',\'{aes_key()}\', 'AES')
                         """
 
             cur.execute(sql_update)
@@ -158,17 +159,19 @@ class Database():
             conn = self.conn
             cur = self.cur
 
-            sql_insert = """
+            sql_insert = f"""
                         INSERT INTO mailing_list (email, status)
-                        VALUES (%s, 1)
+                        VALUES (encrypt(\'{email}\',\'{aes_key()}\', 'AES') , 1)
                         """
 
-            cur.execute(sql_insert, email)
+            cur.execute(sql_insert)
             conn.commit()
+
 
         except Exception as error:
             return error
 
 
 if __name__ == "__main__":
-    print(f'Running main: {__name__}')
+    db = Database()
+    print(db.fetch_mailing_list())
